@@ -78,7 +78,7 @@ class KomapperJdbcAutoConfigurationTest {
 
                 val database = context.getBean(JdbcDatabase::class.java)
                 assertNotNull(database)
-                val dataType = database.config.dataOperator.getDataType<String>(typeOf<String>())
+                val dataType = database.config.dataOperator.getDataType(typeOf<String>())
                 assertEquals("abc", dataType.name)
                 val clock = database.config.clockProvider.now()
                 val timestamp = LocalDateTime.now(clock)
@@ -356,6 +356,9 @@ class KomapperJdbcAutoConfigurationTest {
             get() = throw IllegalStateException("Shouldn't be called")
 
         override val jdbcType
+            get() = throw IllegalStateException("Shouldn't be called")
+
+        override val length: Int?
             get() = throw IllegalStateException("Shouldn't be called")
 
         override fun getValue(rs: ResultSet, index: Int): T? {

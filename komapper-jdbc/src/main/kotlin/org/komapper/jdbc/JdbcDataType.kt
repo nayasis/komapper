@@ -1,5 +1,6 @@
 package org.komapper.jdbc
 
+import org.komapper.core.DataType
 import org.komapper.core.ThreadSafe
 import org.komapper.core.spi.DataTypeConverter
 import org.komapper.core.type.ClobString
@@ -30,23 +31,7 @@ import kotlin.time.toKotlinInstant
  * Represents a data type for JDBC access.
  */
 @ThreadSafe
-interface JdbcDataType<T : Any> {
-    /**
-     * The data type name.
-     */
-    val name: String
-
-    /**
-     * The corresponding type.
-     * [KType.isMarkedNullable] must be false.
-     */
-    val type: KType
-
-    /**
-     * The JDBC type defined in the standard library.
-     */
-    val jdbcType: JDBCType
-
+interface JdbcDataType<T : Any> : DataType {
     /**
      * Returns the value.
      *
@@ -95,6 +80,8 @@ abstract class AbstractJdbcDataType<T : Any>(
     override val type: KType,
     override val jdbcType: JDBCType,
 ) : JdbcDataType<T> {
+    override val length: Int? = null
+
     override fun getValue(rs: ResultSet, index: Int): T? {
         val value = doGetValue(rs, index)
         return if (rs.wasNull()) null else value
@@ -128,8 +115,7 @@ abstract class AbstractJdbcDataType<T : Any>(
     }
 }
 
-class JdbcAnyType(override val name: String) :
-    AbstractJdbcDataType<Any>(typeOf<Any>(), JDBCType.OTHER) {
+class JdbcAnyType(override val name: String) : AbstractJdbcDataType<Any>(typeOf<Any>(), JDBCType.OTHER) {
     override fun doGetValue(rs: ResultSet, index: Int): Any? {
         return rs.getObject(index)
     }
@@ -174,8 +160,10 @@ class JdbcBigDecimalType(override val name: String) :
 
 class JdbcBigIntegerType(override val name: String) : JdbcDataType<BigInteger> {
     private val dataType = JdbcBigDecimalType(name)
-    override val type: KType = typeOf<BigInteger>()
+
+    override val type = typeOf<BigInteger>()
     override val jdbcType = dataType.jdbcType
+    override val length = dataType.length
 
     override fun getValue(rs: ResultSet, index: Int): BigInteger? {
         return dataType.getValue(rs, index)?.toBigInteger()
@@ -662,6 +650,9 @@ class JdbcUserDefinedDataTypeAdapter<T : Any>(
     override val jdbcType: JDBCType
         get() = dataType.jdbcType
 
+    override val length: Int?
+        get() = dataType.length
+
     override fun getValue(rs: ResultSet, index: Int): T? {
         val value = dataType.getValue(rs, index)
         return if (rs.wasNull()) null else value
@@ -694,6 +685,8 @@ class JdbcDataTypeProxy<EXTERIOR : Any, INTERIOR : Any>(
     override val type: KType get() = converter.exteriorType
 
     override val jdbcType: JDBCType get() = dataType.jdbcType
+
+    override val length: Int? get() = dataType.length
 
     override fun getValue(rs: ResultSet, index: Int): EXTERIOR? {
         val value = dataType.getValue(rs, index)
