@@ -4,15 +4,21 @@ import io.r2dbc.spi.Blob
 import io.r2dbc.spi.Clob
 import io.r2dbc.spi.Row
 import io.r2dbc.spi.Statement
+import kotlinx.coroutines.reactive.awaitLast
+import kotlinx.coroutines.reactive.collect
+import kotlinx.coroutines.runBlocking
 import org.komapper.core.DataType
 import org.komapper.core.ThreadSafe
 import org.komapper.core.spi.DataTypeConverter
+import org.komapper.core.type.BlobByteArray
 import org.komapper.core.type.ClobString
 import org.komapper.r2dbc.spi.R2dbcUserDefinedDataType
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.sql.JDBCType
+import java.sql.PreparedStatement
+import java.sql.ResultSet
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -180,6 +186,58 @@ class R2dbcBlobType(override val name: String) :
 
     override fun getValue(row: Row, columnLabel: String): Blob? {
         return row.get(columnLabel, Blob::class.java)
+    }
+}
+
+class R2dbcBlobByteArrayType(override val name: String) : AbstractR2dbcDataType<BlobByteArray>(typeOf<BlobByteArray>(), JDBCType.BLOB, ByteArray::class.javaObjectType) {
+    override fun getValue(row: Row, index: Int): BlobByteArray? {
+        return row.get(index, Blob::class.java)?.let { runBlocking { it.toBlobByteArray() } }
+    }
+
+    override fun getValue(row: Row, columnLabel: String): BlobByteArray? {
+        return row.get(columnLabel, Blob::class.java)?.let { runBlocking { it.toBlobByteArray() } }
+    }
+
+    override fun doToString(value: BlobByteArray): String {
+        return value.value.contentToString()
+    }
+
+    override fun setValue(statement: Statement, index: Int, value: BlobByteArray?) {
+        if (value == null) {
+            statement.bindNull(index, typeOfNull)
+        } else {
+            statement.bind(index, value.value)
+        }
+    }
+
+    override fun setValue(statement: Statement, name: String, value: BlobByteArray?) {
+        if (value == null) {
+            statement.bindNull(name, typeOfNull)
+        } else {
+            statement.bind(name, value.value)
+        }
+    }
+
+    private fun Blob.toBlobByteArray(): BlobByteArray {
+        return runBlocking {
+            try {
+                val byteBuffers = mutableListOf<ByteBuffer>()
+                this@toBlobByteArray.stream().collect { byteBuffers.add(it) }
+
+                val totalSize = byteBuffers.sumOf { it.remaining() }
+                val result = ByteArray(totalSize)
+                var offset = 0
+
+                for (buffer in byteBuffers) {
+                    buffer.get(result, offset, buffer.remaining())
+                    offset += buffer.remaining()
+                }
+
+                BlobByteArray(result)
+            } finally {
+                discard()
+            }
+        }
     }
 }
 

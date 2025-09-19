@@ -3,13 +3,25 @@ package org.komapper.jdbc
 import org.komapper.core.DataType
 import org.komapper.core.ThreadSafe
 import org.komapper.core.spi.DataTypeConverter
+import org.komapper.core.type.BlobByteArray
 import org.komapper.core.type.ClobString
 import org.komapper.jdbc.spi.JdbcUserDefinedDataType
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.sql.*
 import java.sql.Array
-import java.time.*
+import java.sql.Blob
+import java.sql.Clob
+import java.sql.JDBCType
+import java.sql.NClob
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+import java.sql.SQLXML
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 import kotlin.time.ExperimentalTime
@@ -262,6 +274,32 @@ class JdbcClobStringType(override val name: String) : AbstractJdbcDataType<ClobS
 
     override fun doToString(value: ClobString): String {
         return value.value
+    }
+}
+
+class JdbcBlobByteArrayType(override val name: String) : AbstractJdbcDataType<BlobByteArray>(typeOf<BlobByteArray>(), JDBCType.BLOB) {
+    override fun doGetValue(rs: ResultSet, index: Int): BlobByteArray? {
+        return rs.getBlob(index)?.toBlobByteArray()
+    }
+
+    override fun doGetValue(rs: ResultSet, columnLabel: String): BlobByteArray? {
+        return rs.getBlob(columnLabel)?.toBlobByteArray()
+    }
+
+    override fun doSetValue(ps: PreparedStatement, index: Int, value: BlobByteArray) {
+        ps.setBytes(index, value.value)
+    }
+
+    override fun doToString(value: BlobByteArray): String {
+        return value.toString()
+    }
+
+    private fun Blob.toBlobByteArray(): BlobByteArray {
+        return try {
+            BlobByteArray(getBytes(1, length().toInt()))
+        } finally {
+            free()
+        }
     }
 }
 
