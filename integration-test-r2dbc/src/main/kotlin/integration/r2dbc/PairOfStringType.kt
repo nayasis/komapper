@@ -12,7 +12,6 @@ class PairOfStringType : R2dbcUserDefinedDataType<Pair<String, String>> {
     override val type: KType = typeOf<Pair<String, String>>()
     override val r2dbcType: Class<String> = String::class.javaObjectType
     override val jdbcType: JDBCType = JDBCType.VARCHAR
-    override val length: Int? = 500
 
     override fun getValue(row: Row, index: Int): Pair<String, String>? {
         return row.get(index, r2dbcType)?.let {

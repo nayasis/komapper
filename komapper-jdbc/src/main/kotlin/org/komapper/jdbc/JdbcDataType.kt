@@ -7,20 +7,9 @@ import org.komapper.core.type.ClobString
 import org.komapper.jdbc.spi.JdbcUserDefinedDataType
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.sql.*
 import java.sql.Array
-import java.sql.Blob
-import java.sql.Clob
-import java.sql.JDBCType
-import java.sql.NClob
-import java.sql.PreparedStatement
-import java.sql.ResultSet
-import java.sql.SQLXML
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
+import java.time.*
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 import kotlin.time.ExperimentalTime
@@ -80,8 +69,6 @@ abstract class AbstractJdbcDataType<T : Any>(
     override val type: KType,
     override val jdbcType: JDBCType,
 ) : JdbcDataType<T> {
-    override val length: Int? = null
-
     override fun getValue(rs: ResultSet, index: Int): T? {
         val value = doGetValue(rs, index)
         return if (rs.wasNull()) null else value
@@ -163,7 +150,6 @@ class JdbcBigIntegerType(override val name: String) : JdbcDataType<BigInteger> {
 
     override val type = typeOf<BigInteger>()
     override val jdbcType = dataType.jdbcType
-    override val length = dataType.length
 
     override fun getValue(rs: ResultSet, index: Int): BigInteger? {
         return dataType.getValue(rs, index)?.toBigInteger()
@@ -650,9 +636,6 @@ class JdbcUserDefinedDataTypeAdapter<T : Any>(
     override val jdbcType: JDBCType
         get() = dataType.jdbcType
 
-    override val length: Int?
-        get() = dataType.length
-
     override fun getValue(rs: ResultSet, index: Int): T? {
         val value = dataType.getValue(rs, index)
         return if (rs.wasNull()) null else value
@@ -685,8 +668,6 @@ class JdbcDataTypeProxy<EXTERIOR : Any, INTERIOR : Any>(
     override val type: KType get() = converter.exteriorType
 
     override val jdbcType: JDBCType get() = dataType.jdbcType
-
-    override val length: Int? get() = dataType.length
 
     override fun getValue(rs: ResultSet, index: Int): EXTERIOR? {
         val value = dataType.getValue(rs, index)

@@ -15,8 +15,6 @@ class MoodType : JdbcUserDefinedDataType<Mood> {
 
     override val jdbcType: JDBCType = JDBCType.OTHER
 
-    override val length = null
-
     override fun getValue(rs: ResultSet, index: Int): Mood? {
         return rs.getString(index)?.let { Mood.valueOf(it) }
     }

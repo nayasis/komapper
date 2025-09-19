@@ -17,8 +17,6 @@ class UserDefinedIntType : R2dbcUserDefinedDataType<UserDefinedInt> {
 
     override val jdbcType: JDBCType = JDBCType.INTEGER
 
-    override val length: Int? = null
-
     override fun getValue(row: Row, index: Int): UserDefinedInt? {
         return row.get(index, Int::class.javaObjectType)?.let { UserDefinedInt(it) }
     }

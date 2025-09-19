@@ -358,9 +358,6 @@ class KomapperJdbcAutoConfigurationTest {
         override val jdbcType
             get() = throw IllegalStateException("Shouldn't be called")
 
-        override val length: Int?
-            get() = throw IllegalStateException("Shouldn't be called")
-
         override fun getValue(rs: ResultSet, index: Int): T? {
             throw throw IllegalStateException("Shouldn't be called")
         }

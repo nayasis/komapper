@@ -17,8 +17,6 @@ class UserDefinedStringType : R2dbcUserDefinedDataType<UserDefinedString> {
 
     override val jdbcType: JDBCType = JDBCType.VARCHAR
 
-    override val length: Int? = 100
-
     override fun getValue(row: Row, index: Int): UserDefinedString? {
         return row.get(index, String::class.javaObjectType)?.let { UserDefinedString(it) }
     }

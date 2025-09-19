@@ -82,8 +82,6 @@ abstract class AbstractR2dbcDataType<T : Any>(
     override val jdbcType: JDBCType = JDBCType.OTHER,
     val typeOfNull: Class<*> = (type.classifier as KClass<*>).javaObjectType,
 ) : R2dbcDataType<T> {
-    override val length: Int? = null
-
     override fun getValue(row: Row, index: Int): T? {
         return row[index]?.let { convertBeforeGetting(it) }
     }
@@ -152,7 +150,6 @@ class R2dbcBigIntegerType(override val name: String) : R2dbcDataType<BigInteger>
 
     override val type = typeOf<BigInteger>()
     override val jdbcType = dataType.jdbcType
-    override val length = dataType.length
 
     override fun getValue(row: Row, index: Int): BigInteger? {
         return dataType.getValue(row, index)?.toBigInteger()
@@ -527,8 +524,6 @@ class R2dbcUserDefinedDataTypeAdapter<T : Any>(private val dataType: R2dbcUserDe
 
     override val jdbcType: JDBCType get() = dataType.jdbcType
 
-    override val length: Int? get() = dataType.length
-
     override fun getValue(row: Row, index: Int): T? {
         return dataType.getValue(row, index)
     }
@@ -567,8 +562,6 @@ class R2dbcDataTypeProxy<EXTERIOR : Any, INTERIOR : Any>(
     override val type: KType get() = converter.exteriorType
 
     override val jdbcType: JDBCType get() = dataType.jdbcType
-
-    override val length: Int? get() = dataType.length
 
     override fun getValue(row: Row, index: Int): EXTERIOR? {
         return dataType.getValue(row, index)?.let { converter.wrap(it) }

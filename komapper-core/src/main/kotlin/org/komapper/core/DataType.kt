@@ -20,9 +20,4 @@ interface DataType {
      * The JDBC type defined in the standard library.
      */
     val jdbcType: JDBCType
-
-    /**
-     * The length of the data type.
-     */
-    val length: Int?
 }

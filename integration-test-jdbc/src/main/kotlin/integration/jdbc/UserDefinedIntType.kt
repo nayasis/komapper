@@ -15,8 +15,6 @@ class UserDefinedIntType : JdbcUserDefinedDataType<UserDefinedInt> {
 
     override val jdbcType: JDBCType = JDBCType.INTEGER
 
-    override val length = null
-
     override fun getValue(rs: ResultSet, index: Int): UserDefinedInt {
         return UserDefinedInt(rs.getInt(index))
     }

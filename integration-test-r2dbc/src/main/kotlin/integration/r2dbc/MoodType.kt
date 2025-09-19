@@ -17,8 +17,6 @@ class MoodType : R2dbcUserDefinedDataType<Mood> {
 
     override val jdbcType: JDBCType = JDBCType.OTHER
 
-    override val length: Int? = null
-
     override fun getValue(row: Row, index: Int): Mood? {
         return row.get(index, r2dbcType)
     }

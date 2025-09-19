@@ -11,7 +11,6 @@ class PairOfIntType : JdbcUserDefinedDataType<Pair<Int, Int>> {
     override val name: String = "varchar(500)"
     override val type: KType = typeOf<Pair<Int, Int>>()
     override val jdbcType: JDBCType = JDBCType.VARCHAR
-    override val length = 500
 
     override fun getValue(rs: ResultSet, index: Int): Pair<Int, Int>? {
         return rs.getString(index)?.let {
