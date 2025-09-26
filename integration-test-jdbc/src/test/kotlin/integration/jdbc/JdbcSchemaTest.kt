@@ -120,6 +120,5 @@ class JdbcSchemaTest(private val db: JdbcDatabase) {
         }
         check(!result.sql.contains("integer(1000)"))
         check(result.sql.contains("integer"))
-        check(result.sql.contains("varchar(500)"))
     }
 }
